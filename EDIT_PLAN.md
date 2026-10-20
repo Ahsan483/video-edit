@@ -16,14 +16,14 @@ The creator speaks Urdu mixed with English tech words. He walks through the app 
 | 3:56 – 4:29 | **Auto-run every 30 minutes**, Gmail drafts, sign-off. |
 
 ## Editorial decisions
-1. **Keep the split-screen.** It is 9:16, 60 fps, with the same aspect ratio, frame rate and framing as the original. The only layout change is that the webcam eases down 105 px for the behind-the-head keywords (see below).
+1. **Keep the split-screen.** It is 9:16, 60 fps, with the same aspect ratio, frame rate and framing as the original. The only layout change is that the webcam eases down 120 px for the behind-the-head keywords (see below).
 2. **Pauses.** Voice-band VAD found 61 pauses longer than 0.3 s, 26 s in total. Each pause longer than 0.38 s is tightened to about 0.22 s (0.44 s for pauses over 0.7 s). Cuts always fall in silence, on frame boundaries, and the audio is joined with 6 ms dips.
 3. **Jump-cut cover.** After a removed pause of 0.25 s or more, the webcam toggles between 100 % and 104.5 % scale. This happens at most once per 2.5 s, so cuts read as deliberate punch-ins. The screen band is never punched.
 4. **UI zooms.** The UI is only 1080 px wide, so its text is tiny on a phone. Thirteen zooms (×1.5 – ×2.5) sit inside the screen band and always land on the thing being discussed. They are eased (in-out cubic, 0.6 s) and the band edges never move.
 5. **Typography never covers UI.** All type sits in the black bands (y 0–224 and 1627–1919) or on the webcam picture (y ≥ 845). Nothing is placed in the screen band at y 225–837.
 6. **Captions are English words he actually says.** These are Job Hunter, remote jobs, Pakistan, Gemini, Python, repo, CV, ATS, Gmail and similar terms, plus on-screen UI names (Apply on site, Ready, Make CV + cover letter). His Urdu sentences are not translated into captions, to avoid putting wrong words in his mouth. Two short captions are paraphrases of what he says: "AI searches jobs from your prompt" and "Your filter, applied automatically". The typed command `$ git clone jobhunter` illustrates "clone it".
 7. **Subject mask.** A per-frame person matte (u2net_human_seg, guided-filtered to the image edges, temporally interpolated) is computed only for the windows that need it. It is used to place text behind the head and to dim only the background behind that text, never the person.
-8. **Behind-the-head layout.** The crown of his head sits only 45 px below the top of the webcam band, so a keyword placed behind it would be fully hidden. During those words the webcam eases down 105 px (0.55 s in, 0.5 s out). The top rows are filled by edge replication plus blur, which is invisible on this out-of-focus background. The crown then overlaps the lower ~30 % of the letters, which gives a clear "behind the head" look and keeps the word readable. There are 13 such moments, each held for 1.8 s or more.
+8. **Behind-the-head layout.** The crown of his head sits only 45 px below the top of the webcam band, so a keyword placed behind it would be fully hidden. During those words the webcam eases down 120 px (0.55 s in, 0.5 s out). The top rows are filled by edge replication plus blur, which is invisible on this out-of-focus background. The baseline is placed from the measured crown height of each scene, 8 px below it, so the crown only tucks over the lower edge of the letters (about 0–25 px depending on head movement). The word stays fully readable and still reads as sitting behind the head. There are 13 such keywords, each held for 1.7 s or more.
 
 ## TYPOGRAPHY SYSTEM (fixed before editing)
 Font: **Inter** (static 400–800 from fontsource). Accent: **#19D3C5** teal, used for at most one word or element per scene. Everything else is white `#FFFFFF` or soft gray `#B0B7C0`.
@@ -31,7 +31,7 @@ Canvas 1080×1920, side margin 72 px, top-band baseline y = 150, bottom-band cap
 
 | Role | Weight / size | Tracking | Case | Where | Use |
 |---|---|---|---|---|---|
-| Display | ExtraBold 800, auto-fit to 940 px wide, max 190 px | −2 % | UPPER | centred behind the crown, baseline = crown + 28 px | one keyword or short phrase per scene |
+| Display | ExtraBold 800, auto-fit to 940 px wide, max 190 px | −2 % | UPPER | centred behind the crown, baseline = measured crown + 8 px | one keyword or short phrase per scene |
 | Statement | Bold 700, 84 px (auto-fit to 936 px, wraps to 2 lines) | −1.5 % | Sentence | top band, left-aligned at 72 | key statements |
 | Caption | SemiBold 600, 58 px (auto-fit, then 2 lines) | −1 % | Sentence | bottom band, left-aligned at 72 | short supporting lines |
 | Side stack | ExtraBold 800, 40–170 px, auto-fit to the free column (215 px left, 260 px right) | −1 % | UPPER / numerals | beside the face, with a soft shadow | numbers and short labels |
