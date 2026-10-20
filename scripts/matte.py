@@ -18,8 +18,8 @@ def matte(frame_bgr, threads=2):
     m = cv2.resize(m, (cam.shape[1], cam.shape[0]), interpolation=cv2.INTER_CUBIC)
     # tighten the soft u2net edge with a smoothstep, then snap to the image edges (guided filter)
     m = np.clip((m - 0.35) / 0.4, 0, 1); m = m * m * (3 - 2 * m)
-    try:
-        m = cv2.ximgproc.guidedFilter(cam, m.astype(np.float32), 8, 1e-3)
-    except Exception:
-        pass
-    return np.clip(m, 0, 1).astype(np.float32)
+    guide = cv2.cvtColor(cam, cv2.COLOR_BGR2GRAY).astype(np.float32) / 255
+    m = cv2.ximgproc.guidedFilter(guide, m.astype(np.float32), 9, 4e-3)
+    m = cv2.GaussianBlur(m, (0, 0), 1.2)
+    m = np.clip((m - 0.2) / 0.6, 0, 1)
+    return m.astype(np.float32)
