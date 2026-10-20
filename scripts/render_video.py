@@ -9,7 +9,7 @@ import spec
 SAMPLE_RANGES = [(0.0, 11.3), (11.9, 15.1), (29.3, 35.0)]
 MIN_VISIBLE = 0.9          # drop overlays that would be visible for less than this (output seconds)
 MARGIN = 72                # left/right text margin
-DROP = 105                 # px the webcam eases down for behind-head text
+DROP = 120                 # px the webcam eases down for behind-head text
 PUNCH = 1.045              # jump-cut punch-in scale
 IN_D, OUT_D = 0.5, 0.26
 
@@ -47,6 +47,18 @@ def anim_alpha(t, a, b, tin=IN_D, tout=OUT_D):
     return x if t < b else max(x, 0)
 
 sfx = []          # {"t": out seconds, "kind": ..., "gain": ...}
+
+# matte loader
+MDIR = os.path.join(WORK, "mattes")
+_mcache = {}
+def load_matte(fidx):
+    if fidx in _mcache: return _mcache[fidx]
+    p = os.path.join(MDIR, f"{fidx:06d}.png")
+    m = cv2.imread(p, cv2.IMREAD_GRAYSCALE)
+    m = None if m is None else m.astype(np.float32) / 255
+    if len(_mcache) > 8: _mcache.pop(next(iter(_mcache)))
+    _mcache[fidx] = m
+    return m
 
 # ---------------------------------------------------------------- overlays
 class Words:
@@ -119,13 +131,25 @@ class Statement:
             top_y = 1676
         self.w.draw(frame, MARGIN, top_y, t, self.a, self.b)
 
+def scene_crown_rel(t0, t1):
+    """Median top of the person matte (cam-band px) over a scene -> where the head really is in that scene."""
+    tops = []
+    f = int(t0 * FPS) // 3 * 3
+    while f <= int(t1 * FPS):
+        m = load_matte(f)
+        if m is not None:
+            rows = np.where((m > 0.5).sum(1) >= 20)[0]
+            if len(rows): tops.append(rows[0] * 2.0)
+        f += 12
+    return float(np.median(tops)) if tops else CROWN_Y - CAM_Y0
+
 class Behind:
-    def __init__(self, text, accent, a, b):
+    def __init__(self, text, accent, a, b, crown_rel):
         self.a, self.b = a, b
         self.size = fit_size(text, "display", W - 2 * 70, 190, upper=True)
         self.spr = text_sprite(text, "display", WHITE, size=self.size, upper=True, colors=accent_colors(text.upper(), accent))
         # baseline sits 28px below the crown of the (dropped) head, in cam-band coordinates
-        self.base_rel = (CROWN_Y - CAM_Y0) + DROP + 28
+        self.base_rel = crown_rel + DROP + 8      # overlap ~8 px: the crown tucks over the lower edge of the letters
         self.x = (W - self.spr.w) // 2
         self.y = CAM_Y0 + self.base_rel - self.spr.baseline
     def alpha(self, t): return anim_alpha(t, self.a, self.b, 0.5, 0.3)
@@ -192,7 +216,7 @@ ts_map = cm.out_time
 behinds, tops, bottoms, sides, typeds, eyebrows = [], [], [], [], [], []
 for t0, t1, text, acc in spec.BEHIND:
     v = vis(t0, t1)
-    if v: behinds.append(Behind(text, acc, *v)); sfx.append({"t": v[0] - 0.03, "kind": "whoosh", "gain": 1.0})
+    if v: behinds.append(Behind(text, acc, *v, scene_crown_rel(t0, t1))); sfx.append({"t": v[0] - 0.03, "kind": "whoosh", "gain": 1.0})
 for t0, t1, text, acc in spec.TOP:
     v = vis(t0, t1)
     if v: tops.append(Statement(text, acc, v[0], v[1], "top")); sfx.append({"t": v[0] - 0.02, "kind": "whoosh", "gain": 0.55})
@@ -271,17 +295,6 @@ for i in range(1, N):
         last_t = i / FPS
     punch[i] = state
 
-# matte loader
-MDIR = os.path.join(WORK, "mattes")
-_mcache = {}
-def load_matte(fidx):
-    if fidx in _mcache: return _mcache[fidx]
-    p = os.path.join(MDIR, f"{fidx:06d}.png")
-    m = cv2.imread(p, cv2.IMREAD_GRAYSCALE)
-    m = None if m is None else m.astype(np.float32) / 255
-    if len(_mcache) > 8: _mcache.pop(next(iter(_mcache)))
-    _mcache[fidx] = m
-    return m
 def matte_at(sidx):
     f0 = sidx // 3 * 3
     m0, m1 = load_matte(f0), load_matte(f0 + 3)
