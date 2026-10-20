@@ -1,0 +1,4 @@
+source.mov
+work/
+*.pyc
+__pycache__/
