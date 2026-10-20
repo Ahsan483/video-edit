@@ -62,3 +62,10 @@ python scripts/mux.py --mode final output/final.mp4
 scripts/make_small.sh                            # <95 MB version
 ```
 All creative decisions (copy, timing, zooms, click times) live in `scripts/spec.py`. `scripts/gen_plan_tables.py` prints the tables in `EDIT_PLAN.md` from that file.
+
+## Full-quality file status
+- `output/final.mp4` (162 MB) is stored with **Git LFS** on this branch (`.gitattributes` tracks `output/final.mp4`). The upload succeeded.
+- To get the real file, run `git lfs install`, then `git clone` the repo or `git lfs pull`. The file's "Download" button in the GitHub web UI works for LFS files. "Download ZIP" gives only a small pointer file, not the video.
+- GitHub's free LFS plan has a 1 GB/month bandwidth quota, so about six downloads of this file per month.
+- **No GitHub Release was created.** The `gh` CLI in this session had an invalid token, and the GitHub tools available here cannot create releases. If you prefer a Release, upload `output/final.mp4` to one manually (limit 2 GB).
+- `output/final_1080p_smaller.mp4` (91.7 MB) is a normal git file and works with any download method.
