@@ -13,9 +13,9 @@ def build(edl):
     E, Z, SFX = [], [], []
     TOTAL = edl["total"]
 
-    def behind(text, a, b, size=None, right=None, base=1015, x=330, **k):
+    def behind(text, a, b, size=None, right=None, base=1020, x=400, **k):
         n = len(text)
-        size = size or int(min(225, (1400 - x) / (n * 0.70)))
+        size = size or int(min(200, (1400 - x) / (n * 0.70)))
         e = Behind(text, o(a), o(b), x=x, base=base, size=size, **k)
         if right is not None:
             e = Behind(text, o(a), o(b), x=right - text_width(text, 800, size, -0.035), base=base, size=size, **k)
@@ -50,9 +50,7 @@ def build(edl):
     band([[("Emails", 0), ("the", 0), ("recruiter", 1)], [("directly", 0)]], 75.2, 82.0, size=58)
     band([[("Written", 0), ("by", 0), ("AI", 1)], [("Professional", 0), ("drafts", 0)]], 82.6, 94.0, size=56)
     behind("PASSWORD", 100.3, 107.4)
-    label("GENERATE IT IN GMAIL", 100.8, 107.2)
     behind("GEMINI", 108.4, 115.3)
-    label("FREE API KEY", 108.9, 115.0)
     band([[("3", 1), ("things", 0), ("to", 0), ("add", 0)]], 115.8, 121.8, size=70)
     label("README  /  GMAIL SETUP", 122.6, 129.8)
     band([[("Enable", 0), ("two-step", 1)], [("verification", 0)]], 130.4, 135.5, size=56)
@@ -64,12 +62,10 @@ def build(edl):
     for kt in t2.key_times(): SFX.append((kt, "key", -27))
     label("THE APP OPENS", 160.4, 165.3)
     behind("UPLOAD", 166.0, 171.6)
-    label("YOUR CV", 166.4, 171.4)
     band([[("Gemini", 1), ("updates", 0)], [("profile.json", 1)]], 172.0, 177.0, size=58)
     band([[("Experience,", 0), ("jobs,", 0)], [("projects", 1)]], 177.3, 183.0, size=58)
     band([[("A", 0), ("rough", 0), ("draft", 0)], [("prepared", 1)]], 183.4, 187.3, size=58)
     behind("1 CLICK", 188.0, 197.9)
-    label("TAILORED CV + COVER LETTER", 188.6, 197.5)
     band([[("Tailored", 1), ("to", 0), ("each", 0), ("job", 0)]], 198.1, 201.5, size=58)
     band([[("Powered", 0), ("by", 0), ("Gemini", 1)]], 202.6, 210.0, size=62)
     band([[("Free", 1), ("model.", 0)], [("Custom", 0), ("prompt.", 0)]], 210.7, 215.7, size=58)
@@ -81,7 +77,6 @@ def build(edl):
     band([[("Now", 0), ("set", 0), ("a", 0), ("filter", 1)]], 268.0, 271.7, size=62, sfx=False)
     behind("FILTER", 268.3, 271.8)
     behind("C++", 272.2, 277.7)
-    label("KEYWORD", 272.4, 277.5)
     band([[("Worldwide", 1), ("only", 0)]], 278.6, 283.1, size=62)
     band([[("Pakistan", 1), ("region", 0)]], 283.3, 285.5, size=62)
     band([[("Max", 0), ("age", 0), ("10", 1), ("days", 0)]], 285.9, 289.6, size=62)
@@ -95,7 +90,6 @@ def build(edl):
     band([[("Ready", 0), ("to", 0), ("apply", 1)]], 333.0, 338.4, size=62)
     band([[("Make", 0), ("CV", 1), ("+", 0)], [("Cover", 0), ("Letter", 1)]], 338.7, 341.6, size=56)
     behind("TAILORED", 341.9, 349.7)
-    label("CV + COVER LETTER", 342.3, 349.3)
     band([[("It", 0), ("worked.", 1)]], 349.8, 352.3, size=66)
     band([[("CV", 1), ("+", 0), ("cover", 0), ("letter", 0)], [("saved", 1)]], 352.6, 359.5, size=56)
     label("TAILORED FOLDER", 362.9, 368.2)
