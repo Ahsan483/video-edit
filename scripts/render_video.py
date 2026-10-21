@@ -14,11 +14,21 @@ PUNCH = 1.045              # jump-cut punch-in scale
 IN_D, OUT_D = 0.5, 0.26
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--mode", choices=["sample", "final"], required=True)
+ap.add_argument("--mode", choices=["sample", "final", "short"], required=True)
 ap.add_argument("--out", default=None)
 ap.add_argument("--limit", type=int, default=0, help="debug: stop after N output frames")
 args = ap.parse_args()
-ranges = SAMPLE_RANGES if args.mode == "sample" else [(0.0, 269.2)]
+def _snap(t, sil, lim=1.6):
+    mids = [(a + b) / 2 for a, b in sil]
+    best = min(mids, key=lambda m: abs(m - t))
+    return best if abs(best - t) <= lim else t
+def short_ranges(sil):
+    """~55 s Shorts/Reels cut: hook, filters, results, tailored CV, auto-run, sign-off. Edges snapped to pauses."""
+    raw = [(0.0, 11.3), (29.3, 42.3), (74.6, 82.0), (121.8, 129.3), (145.8, 153.6), (236.0, 246.0), (266.2, 269.2)]
+    return [(0.0 if i == 0 else _snap(a, sil), 269.2 if i == len(raw) - 1 else _snap(b, sil)) for i, (a, b) in enumerate(raw)]
+_sil = json.load(open(os.path.join(REPO, "data", "silences.json")))
+ranges = SAMPLE_RANGES if args.mode == "sample" else short_ranges(_sil) if args.mode == "short" else [(0.0, 269.2)]
+if args.mode == "short": print("ranges", [(round(a, 2), round(b, 2)) for a, b in ranges], flush=True)
 OUT = args.out or os.path.join(WORK, f"video_{args.mode}.mp4")
 TL = os.path.join(WORK, f"timeline_{args.mode}.json")
 

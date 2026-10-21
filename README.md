@@ -69,3 +69,6 @@ All creative decisions (copy, timing, zooms, click times) live in `scripts/spec.
 - GitHub's free LFS plan has a 1 GB/month bandwidth quota, so about six downloads of this file per month.
 - **No GitHub Release was created.** The `gh` CLI in this session had an invalid token, and the GitHub tools available here cannot create releases. If you prefer a Release, upload `output/final.mp4` to one manually (limit 2 GB).
 - `output/final_1080p_smaller.mp4` (91.7 MB) is a normal git file and works with any download method.
+
+## Shorts / Reels cut (added later)
+- `output/short_60s.mp4`: **58.8 s**, 1080×1920, 60 fps, −14.0 LUFS. It is cut from the same pipeline (`python scripts/render_video.py --mode short`, then `make_audio.py --mode short` and `mux.py --mode short`). Segments: hook, filters, results, tailored CV, auto-run, sign-off. Cut points are snapped to pauses. Fits the 3-minute YouTube Shorts / Instagram Reels limit.
