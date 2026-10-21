@@ -36,7 +36,7 @@ mix = mix[a:b]
 raw = os.path.join(WORK, f"mix_{name}.wav")
 with wave.open(raw, "wb") as o:
     o.setnchannels(1); o.setsampwidth(2); o.setframerate(SR); o.writeframes((np.clip(mix, -1, 1) * 32767).astype(np.int16).tobytes())
-LN = "I=-14:TP=-1.5:LRA=9"
+LN = "I=-14.6:TP=-1.5:LRA=9"
 r = subprocess.run(["ffmpeg", "-hide_banner", "-i", raw, "-af", f"loudnorm={LN}:print_format=json", "-f", "null", "-"], capture_output=True, text=True).stderr
 j = json.loads(r[r.rindex("{"):r.rindex("}") + 1])
 flt = (f"loudnorm={LN}:measured_I={j['input_i']}:measured_TP={j['input_tp']}:measured_LRA={j['input_lra']}:"

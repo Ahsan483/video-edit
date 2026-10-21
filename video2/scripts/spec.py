@@ -74,7 +74,6 @@ def build(edl):
     band([[("Old", 0), ("profile", 0), ("backed", 0), ("up", 1)]], 239.4, 245.0, size=58)
     band([[("5", 1), ("roles", 0), ("·", 0), ("25", 1), ("bullets", 0)], [("18", 1), ("projects", 0), ("·", 0), ("66", 1), ("skills", 0)]], 245.4, 253.0, size=56)
     label("PROFILE.JSON  UPDATED", 255.9, 261.4)
-    band([[("Now", 0), ("set", 0), ("a", 0), ("filter", 1)]], 268.0, 271.7, size=62, sfx=False)
     behind("FILTER", 268.3, 271.8)
     behind("C++", 272.2, 277.7)
     band([[("Worldwide", 1), ("only", 0)]], 278.6, 283.1, size=62)
