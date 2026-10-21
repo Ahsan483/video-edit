@@ -43,18 +43,19 @@ class Band:
     """Word-by-word staggered statement in the empty band right of the webcam. lines = [[(word, accent), ...], ...]"""
     kind = "band"
     def __init__(self, lines, t0, t1, x=610, base=945, size=62, line_h=None, weight=700, align="left", right=1395,
-                 colors=None, sub=False):
+                 colors=None, sub=False, left=None):
         self.lines, self.t0, self.t1, self.x, self.base, self.size = lines, t0, t1, x, base, size
         self.lh = line_h or int(size * 1.2); self.weight, self.align, self.right = weight, align, right
-        self.sub = sub
+        self.sub = sub; self.left = BAND[0] + 4 if left is None else left
         self.space = int(size * 0.26)
         self.layout = []
         for li, line in enumerate(lines):
-            ws = [_adv(w, weight, size, -0.015) for w, _ in line]
-            tot = sum(ws) + self.space * (len(ws) - 1)
+            ws = [_adv(w.lstrip("\b"), weight, size, -0.015) for w, _ in line]
+            gaps = [0 if w.startswith("\b") else self.space for w, _ in line]; gaps[0] = 0
+            tot = sum(ws) + sum(gaps)
             x0 = x if align == "left" else (right - tot if align == "right" else x + (right - x - tot) / 2)
             xs = []; cx = x0
-            for w in ws: xs.append(cx); cx += w + self.space
+            for w, g in zip(ws, gaps): cx += g; xs.append(cx); cx += w
             self.layout.append((xs, tot))
     def active(self, t): return self.t0 <= t <= self.t1 + OUT_DUR
     def draw(self, fr, t):
@@ -63,11 +64,11 @@ class Band:
         k = 0
         for li, line in enumerate(self.lines):
             base = self.base + li * self.lh
-            win = (BAND[0] + 4, int(base - self.size * 0.98), W, int(base + self.size * 0.26))
+            win = (self.left, int(base - self.size * 0.98), W, int(base + self.size * 0.26))
             for wi, (w, acc) in enumerate(line):
                 p = ease_out_expo((lt - li * 0.16 - wi * 0.075) / 0.6)
                 col = AMBER if acc else (SOFT if self.sub else OFFWHITE)
-                spr, ox, oy = sprite(w, self.weight, self.size, col, -0.015, shadow=0)
+                spr, ox, oy = sprite(w.lstrip("\b"), self.weight, self.size, col, -0.015, shadow=0)
                 dy = int((1 - p) * self.size * 1.05)
                 blit(fr, spr, int(self.layout[li][0][wi]) - ox + dx, base - oy + dy, a=min(1, p * 2) * a_out, clip=win)
                 k += 1

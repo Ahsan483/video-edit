@@ -16,8 +16,8 @@ def guided(I, p, r, eps):
     a = cov / (var + eps); b = mp - a * mI
     return bf(a) * I + bf(b)
 
-def matte(frame_bgr, threads=1):
-    x0, y0, x1, y1 = CAM
+def matte(frame_bgr, threads=1, rect=CAM):
+    x0, y0, x1, y1 = rect
     cam = frame_bgr[y0:y1, x0:x1]
     x = cv2.resize(cam, (320, 320), interpolation=cv2.INTER_AREA).astype(np.float32)[:, :, ::-1] / 255
     x = (x - [0.485, 0.456, 0.406]) / [0.229, 0.224, 0.225]

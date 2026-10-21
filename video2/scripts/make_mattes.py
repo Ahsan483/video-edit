@@ -33,7 +33,10 @@ def work(win):
         if f % 3: continue
         p = os.path.join(OUTD, f"{f:06d}.png")
         if os.path.exists(p): continue
-        cv2.imwrite(p, (matte(fr) * 255).astype(np.uint8)); n += 1
+        full = f / FPS < 45.0 and f / FPS > 30.0        # full-width webcam intro layout
+        m = matte(fr, 1, (0, 0, 1440, 875)) if full else matte(fr)
+        if full: m = cv2.resize(m, (720, 438), interpolation=cv2.INTER_AREA)
+        cv2.imwrite(p, (m * 255).astype(np.uint8)); n += 1
     return n
 
 if __name__ == "__main__":

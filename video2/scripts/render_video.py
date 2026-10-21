@@ -42,11 +42,15 @@ def apply_zoom(fr, z, cx, cy):
     x0 = min(max(cx - cw / 2, 0), W - cw); y0 = min(max(cy - ch / 2, 0), ZOOM_H - ch)
     M = np.array([[z, 0, -x0 * z], [0, z, -y0 * z]], np.float32)
     fr[:ZOOM_H] = cv2.warpAffine(fr[:ZOOM_H], M, (W, ZOOM_H), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+    # soften the seam where the zoomed screen meets the static webcam/taskbar strip
+    ramp = np.linspace(0, 0.9, 36, dtype=np.float32)[None, :, None].transpose(1, 0, 2)
+    seg = fr[ZOOM_H - 36:ZOOM_H].astype(np.float32)
+    fr[ZOOM_H - 36:ZOOM_H] = (seg + (np.array([20, 18, 15], np.float32) - seg) * ramp).astype(np.uint8)
 
 _band_bg = None
-def band_bg():
+def band_bg(full=False):
     global _band_bg
-    x0, y0, x1, y1 = BAND
+    x0, y0, x1, y1 = (0, 875, 1440, 1080) if full else BAND
     yy = np.linspace(0, 1, y1 - y0, dtype=np.float32)[:, None]
     xx = np.linspace(0, 1, x1 - x0, dtype=np.float32)[None, :]
     g = 0.0 + 0.0 * xx + yy * 0
@@ -55,26 +59,37 @@ def band_bg():
     _band_bg = (base + (top - base) * mix).astype(np.float32)
     return _band_bg
 
+FULLCAM = (0, 0, 1440, 875)
+def is_full(t):
+    s, _ = out2src(t); return 30.7 <= s < 45.0
+
 def compose(fr, t, ctx):
     """fr: source frame BGR (modified in place). ctx: dict(els, zooms, punch, matte)."""
-    x0, y0, x1, y1 = CAM
+    full = is_full(t)
+    x0, y0, x1, y1 = FULLCAM if full else CAM
     # screen zoom
-    z, cx, cy = zoom_state(ctx["zooms"], t); apply_zoom(fr, z, cx, cy)
+    if not full:
+        z, cx, cy = zoom_state(ctx["zooms"], t); apply_zoom(fr, z, cx, cy)
     # navy band behind the typography (only where the source is pure black)
-    bx0, by0, bx1, by1 = BAND
+    bx0, by0, bx1, by1 = (0, 875, 1440, 1080) if full else BAND
     reg = fr[by0:by1, bx0:bx1]
     blk = (reg.max(2) < 14)
     if blk.mean() > 0.85:
-        bg = ctx.get("band") if ctx.get("band") is not None else band_bg()
-        ctx["band"] = bg
+        key = ("band", full)
+        if key not in ctx: ctx[key] = band_bg(full)
+        bg = ctx[key]
         reg[:] = np.where(blk[..., None], bg.astype(np.uint8), reg)
         # hairline between screen and band
         fill_rect(fr, bx0, by0, bx1, by0 + 1, (40, 46, 58), 0.8)
     cam = fr[y0:y1, x0:x1].copy()
-    m = ctx["matte"](t)
+    need = any(e.kind == "behind" and e.active(t) for e in ctx["els"])
+    m = ctx["matte"](t) if need else None
+    if m is not None and m.shape != cam.shape[:2]: m = cv2.resize(m, (cam.shape[1], cam.shape[0]), interpolation=cv2.INTER_LINEAR)
+    if m is not None: m = cv2.GaussianBlur(cv2.erode(m, np.ones((3, 3), np.uint8)), (0, 0), 0.8)
     ps = ctx["punch"](t)
     if ps > 1.0005:
-        M = np.array([[ps, 0, (1 - ps) * 279], [0, ps, (1 - ps) * 130]], np.float32)
+        pcx, pcy = (840, 480) if full else (279, 130)
+        M = np.array([[ps, 0, (1 - ps) * pcx], [0, ps, (1 - ps) * pcy]], np.float32)
         cam = cv2.warpAffine(cam, M, (x1 - x0, y1 - y0), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
         if m is not None: m = cv2.warpAffine(m, M, (x1 - x0, y1 - y0), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
     fr[y0:y1, x0:x1] = cam
@@ -95,20 +110,24 @@ def compose(fr, t, ctx):
         if e.kind == "card" and e.active(t): e.draw(fr, t)
     return fr
 
-def worker(args):
-    k0, k1, path, crf = args
+def make_ctx():
     built = spec.build(EDL)
-    els = built["elements"]; zooms = built["zooms"]
     punches = built["punches"]
     def punch(t):
         v = 1.0
         for (a, b, s) in punches:
-            if a - 0.25 <= t <= b + 0.25:
-                v = max(v, 1 + (s - 1) * ease_in_out_cubic(min((t - a + 0.25) / 0.5, (b + 0.25 - t) / 0.5, 1)))
+            if a <= t < b: v = max(v, s)
         return v
     def matte(t):
         s, _ = out2src(t); return load_matte(int(round(s * FPS)))
-    ctx = dict(els=els, zooms=zooms, punch=punch, matte=matte)
+    return dict(els=built["elements"], zooms=built["zooms"], punch=punch, matte=matte)
+
+def grab(cap, t):
+    s, _ = out2src(t); cap.set(cv2.CAP_PROP_POS_FRAMES, int(round(s * FPS))); ok, fr = cap.read(); return fr
+
+def worker(args):
+    k0, k1, path, crf = args
+    ctx = make_ctx()
     cmd = ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
            "-c:v", "libx264", "-preset", "medium", "-crf", str(crf), "-pix_fmt", "yuv420p", "-threads", "1",
            "-x264-params", "keyint=120:min-keyint=120:scenecut=0", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709",
