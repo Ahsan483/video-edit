@@ -124,7 +124,7 @@ def build(idx, edl):
         behind(["2FA"], 352.9, 355.6, size=185, base=1350)
         behind(["NEW", "ORG"], 372.7, 380.6, size=150, base=1300)
         behind(["LIKE", "FOLLOW"], 385.1, 389.7, size=140, base=1300)
-        behind(["FEEDBACK"], 390.0, 395.5, size=88, base=1350)
+        behind(["FEED", "BACK"], 390.0, 395.5, size=130, base=1300)
         E.append(Hook([[("THANK", 0), ("YOU", 1)]], o(396.6), TOTAL + 3, size=130, base=680, dim=0.78, sub="LIKE · COMMENT · FOLLOW")); SFX.append((o(396.7), "whoosh", -22))
 
     if idx in (1, 2): E.append(Next(f"PART {idx + 1} IN THE NEXT VIDEO", TOTAL - 3.0, TOTAL + 1.0))
