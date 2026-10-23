@@ -73,8 +73,7 @@ def build(idx, edl):
         zoom(33.5, 900, 200, 1.9); ring((956, 113, 1034, 143), 33.9, 37.0, "ADD EMPLOYEE", place="below")
         zoom(37.8, 815, 520, 1.45); ring((573, 253, 1057, 830), 38.0, 47.0, "PAYROLL ANALYTICS")
         stat("PKR 1,630,000", "PAYROLL THIS MONTH", 41.8, 47.0, base=1230)
-        zoom(47.8, 380, 330, 1.85); ring((363, 253, 555, 390), 48.0, 52.2, "ACTIVE EMPLOYEES")
-        overview(52.5, 0.7); zoom(52.8, 355, 600, 1.35)
+        overview(47.8, 0.7); zoom(52.8, 355, 600, 1.35)
         zoom(61.9, 540, 394, 1.0, 0.6)
         behind(["PEOPLE"], 62.5, 67.5, size=120, base=1340)
         zoom(66.5, 600, 520, 1.25); ring((212, 257, 392, 282), 71.0, 76.5, "SEARCH", place="below")
@@ -129,6 +128,9 @@ def build(idx, edl):
         E.append(Hook([[("THANK", 0), ("YOU", 1)]], o(396.6), TOTAL + 3, size=130, base=680, dim=0.78, sub="LIKE · COMMENT · FOLLOW")); SFX.append((o(396.7), "whoosh", -22))
 
     if idx in (1, 2): E.append(Next(f"PART {idx + 1} IN THE NEXT VIDEO", TOTAL - 3.0, TOTAL + 1.0))
+
+    tags = sorted([e for e in E if e.kind == "tag"], key=lambda e: e.t0)
+    for a_, b_ in zip(tags, tags[1:]): a_.t1 = min(a_.t1, b_.t0 - 0.30)
 
     # ---- sweeps / navigation sound ---------------------------------------------------------------------------------
     for tn in NAV:
