@@ -13,7 +13,7 @@ class Caption:
         self.words = words; self.size = size; self.weight = weight
         self.t0 = words[0][1] - 0.04; self.t1 = words[-1][2] + 0.06
         self.zone = zone; maxw = zone[2] - zone[0]
-        sp = int(size * 0.28); lines = [[]]; w = 0
+        sp = int(size * 0.34); lines = [[]]; w = 0
         for i, (tx, a, b) in enumerate(words):
             ww = _adv(tx, weight, size, -0.02)
             if lines[-1] and w + sp + ww > maxw: lines.append([]); w = 0
@@ -37,7 +37,7 @@ class Caption:
             else: col, al = OFFWHITE, 1.0
             if al <= 0: continue
             pop = 1.0
-            if a <= t <= b + 0.08: pop = 1 + 0.13 * math.sin(math.pi * clamp01((t - a) / 0.22)) ** 0.8
+            if a <= t <= b + 0.08: pop = 1 + 0.085 * math.sin(math.pi * clamp01((t - a) / 0.22)) ** 0.8
             spr, ox, oy = sprite(tx, self.weight, self.size, col, -0.02, shadow=0.0)
             if pop > 1.003:
                 s2 = cv2.resize(spr, None, fx=pop, fy=pop, interpolation=cv2.INTER_LINEAR)
@@ -197,7 +197,7 @@ class Stat:
         x = self.x - w_ if self.align == "right" else self.x
         win = (0, int(self.base - self.size * 0.95), W, int(self.base + self.size * 0.3))
         blit(fr, spr, int(x) - ox, self.base - oy + int((1 - p) * self.size), a=a * min(1, p * 2), clip=win)
-        sp2, ox2, oy2 = sprite(self.caption, 700, 26, AMBER, 0.16); w2 = _adv(self.caption, 700, 26, 0.16)
+        sp2, ox2, oy2 = sprite(self.caption, 700, 26, AMBER, 0.16, shadow=0.7); w2 = _adv(self.caption, 700, 26, 0.16)
         pp = ease_out_expo((lt - 0.25) / 0.5)
         blit(fr, sp2, int(x + w_ - w2 if self.align == "right" else x) - ox2, self.base + 44 - oy2, a=a * pp)
         u = ease_in_out_cubic((lt - 0.3) / 0.5)

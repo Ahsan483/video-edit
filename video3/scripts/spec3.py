@@ -20,6 +20,8 @@ def build(idx, edl):
 
     # ---- helpers -------------------------------------------------------------------------------------------------
     def behind(lines, a, b, size=150, base=1330, lh=None, right=1048, sfx=True):
+        wmax = max(text_width(tx, 800, size, -0.035) for tx in lines)
+        if right - wmax < 670: size = int(size * (right - 670) / wmax)        # keep letters clear of the head so they stay legible
         lh = lh or int(size * 1.08)
         for i, tx in enumerate(lines):
             e = Behind(tx, o(a) + i * 0.07, o(b), right=right, base=base + i * lh, size=size, underline=(i == len(lines) - 1))
@@ -98,8 +100,7 @@ def build(idx, edl):
         zoom(162.7, 920, 330, 1.9); ring((888, 296, 970, 336), 163.0, 168.7, "RUN PAYROLL")
         zoom(169.3, 320, 440, 1.9); ring((230, 402, 404, 487), 169.4, 173.1, "TOTAL PAID")
         behind(["SLIPS"], 173.3, 178.3, size=150, base=1340)
-        zoom(173.3, 940, 560, 1.7); ring((908, 436, 972, 735), 173.6, 180.4, "PAYSLIPS")
-        overview(181.0, 0.8)
+        overview(173.3, 0.7)
         zoom(185.6, 500, 500, 1.15)
         behind(["CHAT"], 185.6, 189.0, size=170, base=1350)
         behind(["REACT"], 195.7, 200.6, size=130, base=1340)
