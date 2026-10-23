@@ -80,7 +80,7 @@ class Behind:
 class SectionTag:
     """Top-left section label that slides up when the topic changes (amber square + tracked caps)."""
     kind = "tag"
-    def __init__(self, text, t0, t1, x=44, y=124, size=30):
+    def __init__(self, text, t0, t1, x=44, y=146, size=30):
         self.text, self.t0, self.t1, self.x, self.y, self.size = text, t0, t1, x, y, size
     def active(self, t): return self.t0 <= t <= self.t1 + 0.3
     def draw(self, fr, t):
@@ -202,3 +202,19 @@ class Stat:
         blit(fr, sp2, int(x + w_ - w2 if self.align == "right" else x) - ox2, self.base + 44 - oy2, a=a * pp)
         u = ease_in_out_cubic((lt - 0.3) / 0.5)
         fill_rect(fr, x, self.base + 14, x + w_ * u, self.base + 18, AMBER, a * 0.9)
+
+class Next:
+    """End-of-part teaser at the bottom: tracked caps + amber chevrons that slide."""
+    kind = "next"
+    def __init__(self, text, t0, t1, y=1836):
+        self.text, self.t0, self.t1, self.y = text, t0, t1, y
+    def active(self, t): return self.t0 <= t <= self.t1 + 0.3
+    def draw(self, fr, t):
+        lt = t - self.t0; p = ease_out_expo(lt / 0.6); a = min(1, p) * (1 - ease_in_cubic((t - self.t1) / 0.25))
+        spr, ox, oy = sprite(self.text, 700, 30, OFFWHITE, 0.18); w_ = _adv(self.text, 700, 30, 0.18)
+        x = (W - w_) / 2 - 30
+        blit(fr, spr, int(x) - ox, self.y - oy + int((1 - p) * 24), a=a)
+        for i in range(3):
+            ph = (lt * 1.6 - i * 0.18) % 1.0; al = a * (0.25 + 0.75 * math.sin(math.pi * ph))
+            cs, cox, coy = sprite("\u203a", 800, 40, AMBER, 0)
+            blit(fr, cs, int(x + w_ + 18 + i * 20) - cox, self.y + 6 - coy, a=al)

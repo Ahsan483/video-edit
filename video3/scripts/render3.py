@@ -105,7 +105,7 @@ def compose(src, t, sh, ctx):
     fill_rect(fr, SCR_CARD[0], 936, SCR_CARD[2], 940, (44, 50, 62), 1)
     fill_rect(fr, SCR_CARD[0], 936, SCR_CARD[0] + (SCR_CARD[2] - SCR_CARD[0]) * clamp01(t / sh.total), 940, AMBER, 1)
     spr, o_x, o_y = sprite(f"PART {sh.idx}/3", 700, 28, SOFT, 0.16)
-    blit(fr, spr, SCR_CARD[2] - 6 - (spr.shape[1] - o_x) - 20 + 0, 146 - o_y, a=0.9)
+    blit(fr, spr, SCR_CARD[2] - (spr.shape[1] - o_x) - 14, 146 - o_y, a=0.9)
     # elements
     for e in ctx["els"]:
         if not e.active(t) or e.kind in ("hook", "behind"): continue
