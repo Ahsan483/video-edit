@@ -86,7 +86,7 @@ def build(idx, edl):
         behind(["TOOLS"], 102.7, 106.6, size=150, base=1340)
         zoom(102.7, 960, 440, 1.6); ring((928, 305, 1060, 590), 103.0, 106.5, "SMALL TOOLS")
     elif idx == 2:
-        hook([[("TRACK", 0), ("ATTENDANCE", 1)], [("RUN", 0), ("PAYROLL", 1)]], 106.8, 109.6, sub="PART 2 · PAYFLOW PRO", size=104)
+        hook([[("ATTENDANCE", 1)], [("PAYROLL", 1)], [("& MESSAGES", 0)]], 106.8, 109.6, sub="PART 2 · PAYFLOW PRO", size=112)
         tag("ATTENDANCE", 109.8, 158.1); tag("PAYROLL", 158.7, 185.2); tag("MESSAGES", 185.4, 243.6)
         behind(["CHECK", "IN"], 118.6, 124.2, size=140, base=1300)
         zoom(118.3, 250, 535, 1.6); ring((162, 515, 340, 555), 118.8, 123.8, "CHECK IN")
@@ -107,7 +107,7 @@ def build(idx, edl):
         zoom(235.2, 540, 500, 1.55); ring((410, 315, 670, 683), 235.4, 239.5, "CREATE A CHANNEL")
         overview(240.0, 0.7)
     else:
-        hook([[("EMAIL", 1), ("NOTES", 0)], [("TICKETS", 1), ("& MORE", 0)]], 243.8, 246.6, sub="PART 3 · PAYFLOW PRO", size=104)
+        hook([[("NOTES", 0)], [("TICKETS", 0)], [("SETTINGS", 1)]], 243.8, 246.6, sub="PART 3 · PAYFLOW PRO", size=100)
         tag("EMAIL", 246.8, 271.0); tag("NOTES", 271.5, 296.6); tag("TICKETS", 296.7, 315.4); tag("AUDIT LOGS", 315.5, 321.5)
         tag("SETTINGS", 321.6, 364.0); tag("NEW ORGANIZATION", 364.2, 384.7); tag("YOUR FEEDBACK", 384.9, 398.0)
         behind(["EMAIL"], 247.4, 252.5, size=140, base=1340)
